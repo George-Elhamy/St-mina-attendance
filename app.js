@@ -336,12 +336,21 @@ async function renderMonthlySummary(selectedMonth = null, selectedYear = null) {
     
     // Render list
     let html = '';
+    let displayRank = 1;
+    let previousCount = null;
+    
     sorted.forEach(([student, count], index) => {
-        const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
+        // Update rank only if count is different from previous
+        if (previousCount !== null && count < previousCount) {
+            displayRank++;
+        }
+        previousCount = count;
+        
+        const rankClass = displayRank === 1 ? 'gold' : displayRank === 2 ? 'silver' : displayRank === 3 ? 'bronze' : '';
         const countText = count === 1 ? 'مرة' : 'مرات';
         html += `
             <div class="rank-item">
-                <div class="rank-number ${rankClass}">#${index + 1}</div>
+                <div class="rank-number ${rankClass}">#${displayRank}</div>
                 <div class="rank-name">${student}</div>
                 <div class="rank-count">${count} ${countText}</div>
             </div>
@@ -392,12 +401,21 @@ async function updateRanking() {
     
     // Render list
     let html = '';
+    let displayRank = 1;
+    let previousCount = null;
+    
     sorted.forEach(([student, count], index) => {
-        const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
+        // Update rank only if count is different from previous
+        if (previousCount !== null && count < previousCount) {
+            displayRank++;
+        }
+        previousCount = count;
+        
+        const rankClass = displayRank === 1 ? 'gold' : displayRank === 2 ? 'silver' : displayRank === 3 ? 'bronze' : '';
         const countText = count === 1 ? 'مرة' : 'مرات';
         html += `
             <div class="rank-item">
-                <div class="rank-number ${rankClass}">#${index + 1}</div>
+                <div class="rank-number ${rankClass}">#${displayRank}</div>
                 <div class="rank-name">${student}</div>
                 <div class="rank-count">${count} ${countText}</div>
             </div>
@@ -421,7 +439,7 @@ async function renderAddAttendance() {
         html += `
             <div class="student-item">
                 <label>
-                    <input type="checkbox" name="student" value="${student}" checked>
+                    <input type="checkbox" name="student" value="${student}">
                     <span>${student}</span>
                 </label>
             </div>
