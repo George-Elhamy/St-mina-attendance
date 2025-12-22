@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام حضور فصل مارمينا</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, 'Calibri', sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            border: 2px solid #1e3a8a;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #1e3a8a;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .header p {
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .nav-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .nav-btn {
+            background: white;
+            border: 2px solid #1e3a8a;
+            border-radius: 8px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.2em;
+            color: #1e3a8a;
+            font-weight: 600;
+        }
+
+        .nav-btn:hover {
+            background: #f0f4ff;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: #1e3a8a;
+            color: white;
+            border-color: #1e3a8a;
+        }
+
+        .content-area {
+            background: white;
+            border: 2px solid #1e3a8a;
+            border-radius: 8px;
+            padding: 30px;
+            min-height: 500px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-title {
+            color: #1e3a8a;
+            font-size: 2em;
+            margin-bottom: 30px;
+            text-align: center;
+            border-bottom: 2px solid #1e3a8a;
+            padding-bottom: 15px;
+            font-weight: bold;
+        }
+
+        /* Table Styles */
+        .attendance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            overflow-x: auto;
+            display: block;
+        }
+
+        .attendance-table table {
+            width: 100%;
+            min-width: 600px;
+        }
+
+        .attendance-table th,
+        .attendance-table td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .attendance-table th {
+            background: #1e3a8a;
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+
+        .attendance-table td.name-column {
+            font-weight: bold;
+            color: #333;
+            text-align: right;
+            background: #f8f9fa;
+        }
+
+        .attendance-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .attendance-table tr:hover {
+            background: #e9ecef;
+        }
+
+        .present {
+            color: #00C853;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .absent {
+            color: #FF1744;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        /* Filter Buttons */
+        .filter-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            background: white;
+            border: 2px solid #1e3a8a;
+            border-radius: 6px;
+            padding: 12px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #1e3a8a;
+            font-weight: 600;
+            font-size: 1em;
+        }
+
+        .filter-btn:hover {
+            background: #f0f4ff;
+        }
+
+        .filter-btn.active {
+            background: #1e3a8a;
+            color: white;
+            border-color: #1e3a8a;
+        }
+
+        /* Date Range Inputs */
+        .date-range {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .date-range label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .date-range input {
+            padding: 10px;
+            border: 2px solid #1e3a8a;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .date-range button {
+            background: #1e3a8a;
+            color: white;
+            border: 2px solid #1e3a8a;
+            border-radius: 6px;
+            padding: 12px 30px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+        }
+
+        .date-range button:hover {
+            background: #2d4ba8;
+        }
+
+        /* Summary Stats */
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #1e3a8a;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #1e3a8a;
+        }
+
+        .stat-card h3 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .stat-card p {
+            font-size: 1.1em;
+        }
+
+        /* Add Attendance Form */
+        .attendance-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .date-selector {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .date-selector label {
+            display: block;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .date-selector input {
+            padding: 12px;
+            border: 2px solid #1e3a8a;
+            border-radius: 6px;
+            font-size: 1.1em;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .student-list {
+            margin-bottom: 30px;
+        }
+
+        .student-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+        }
+
+        .student-item:hover {
+            background: #e9ecef;
+            transform: translateX(-5px);
+        }
+
+        .student-item label {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            font-size: 1.1em;
+            width: 100%;
+        }
+
+        .student-item input[type="checkbox"] {
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            accent-color: #1e3a8a;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: #00C853;
+            color: white;
+            border: 2px solid #00C853;
+            border-radius: 6px;
+            padding: 18px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: #00E676;
+            border-color: #00E676;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* Ranking Styles */
+        .ranking-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .rank-item {
+            background: #f8f9fa;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .rank-item:hover {
+            background: #e9ecef;
+            transform: translateX(-5px);
+        }
+
+        .rank-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #1e3a8a;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .rank-number.gold {
+            color: #FFD700;
+        }
+
+        .rank-number.silver {
+            color: #C0C0C0;
+        }
+
+        .rank-number.bronze {
+            color: #CD7F32;
+        }
+
+        .rank-name {
+            flex: 1;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .rank-count {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #1e3a8a;
+            background: white;
+            padding: 10px 20px;
+            border: 2px solid #1e3a8a;
+            border-radius: 6px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .nav-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .page-title {
+                font-size: 1.5em;
+            }
+
+            .attendance-table {
+                font-size: 0.9em;
+            }
+
+            .attendance-table th,
+            .attendance-table td {
+                padding: 10px 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+    
+
+        <div class="nav-buttons">
+            <button class="nav-btn active" onclick="showPage('history')">السجل الكامل</button>
+            <button class="nav-btn" onclick="showPage('monthly')">ترتيب شهري</button>
+            <button class="nav-btn" onclick="showPage('ranking')">ترتيب فترة معينة</button>
+            <button class="nav-btn" onclick="showPage('add')">إضافة حضور</button>
+        </div>
+
+        <div class="content-area">
+            <!-- Full History Page -->
+            <div id="history" class="page active">
+                <h2 class="page-title">السجل الكامل للحضور</h2>
+                <div class="attendance-table" id="historyTable"></div>
+            </div>
+
+            <!-- Monthly Summary Page -->
+            <div id="monthly" class="page">
+                <h2 class="page-title">الملخص الشهري</h2>
+                <div class="filter-section" id="monthFilters"></div>
+                <div class="ranking-list" id="monthlySummary"></div>
+            </div>
+
+            <!-- Ranking Page -->
+            <div id="ranking" class="page">
+                <h2 class="page-title">ترتيب الطلاب</h2>
+                <div class="date-range">
+                    <label>من:</label>
+                    <input type="date" id="startDate">
+                    <label>إلى:</label>
+                    <input type="date" id="endDate">
+                    <button onclick="updateRanking()">عرض الترتيب</button>
+                </div>
+                <div class="ranking-list" id="rankingList"></div>
+            </div>
+
+            <!-- Add Attendance Page -->
+            <div id="add" class="page">
+                <h2 class="page-title">إضافة حضور جديد</h2>
+                <div class="attendance-form">
+                    <div class="date-selector">
+                        <label>تاريخ الاجتماع (الخميس):</label>
+                        <input type="date" id="newAttendanceDate">
+                    </div>
+                    <div class="student-list" id="studentCheckboxes"></div>
+                    <button class="submit-btn" onclick="submitAttendance()">حفظ الحضور</button>
+                    <div class="success-message" id="successMessage">تم حفظ الحضور بنجاح!</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
